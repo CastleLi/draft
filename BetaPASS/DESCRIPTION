@@ -17,7 +17,7 @@ License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Imports: betareg, ggplot2, Rcpp, stats, pbapply
+Imports: betareg, ggplot2, pbapply, stats
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
