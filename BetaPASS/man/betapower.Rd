@@ -41,8 +41,8 @@ equal.precision=TRUE, sd1 = NULL)
 \value{
 Return a betapower object including basic settings (mean and standard deviation for the control group, 
 significant level, number of trials and link types), and a matrix of estimated power with given sample size and mu1.
-\item{power.of.GLM: link name}{estimated power using beta regression method; it will return the power with every links if you use link.type = "all" statement.}
-\item{power.of.Wilcoxon.test}{estimated power from Wilcoxon Rank sum test.}
+\item{beta regression(link name)}{estimated power using beta regression method; it will return the power with every links if you use link.type = "all" statement.}
+\item{Wilcoxon}{estimated power from Wilcoxon Rank sum test.}
 \item{sample size}{sample size.} 
 \item{mu1}{mean for the treatment group under the alternative.}
 }
