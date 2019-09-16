@@ -81,20 +81,19 @@ betapwr <- function(mu0,sd0,mu1,sampsize,trials,seed,link.type,equal.precision,s
   }
   return(Power)
 }
-
-print.betapower <- function(obj){
+#' @export
+print.betapower <- function(x,...){
   cat("    Two beta-distributed samples power calculation\n")
-  cat("\n              mu0 = ",obj$mu0,"\n              sd0 = ",obj$sd0,"\n")
-  if(obj$equal.precision==FALSE){
-    cat("              sd1 = ",obj$sd1,"\n")
+  cat("\n              mu0 = ",x$mu0,"\n              sd0 = ",x$sd0,"\n")
+  if(x$equal.precision==FALSE){
+    cat("              sd1 = ",x$sd1,"\n")
   }
-  cat("        sig.level = ",obj$sig.level,"\n number of trials = ",obj$trials, 
-      "\n        link.type = ",obj$link.type,"\n \n")
+  cat("        sig.level = ",x$sig.level,"\n number of trials = ",x$trials, 
+      "\n        link.type = ",x$link.type,"\n \n")
   cat("      Estimated power\n")
-  print.default(obj$Power.matrix)
+  print.default(x$Power.matrix,...)
 }
-
-
+#' @export
 plot.betapower <- function(x,...,link.type,by){
   betapower.matrix <- data.frame(x$Power.matrix, check.names = FALSE)
   if(link.type[1]=="all"){
