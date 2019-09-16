@@ -56,9 +56,13 @@ The samplesize function allows you to control the number of trials in the simula
 the target power, delta, and the alternative means.
 You can fix the alternative and vary power to match a desired sample size; 
 Use default values for the number of trials for a quick view;
-Use a larger number of trials (say 1000) and a smaller delta (say 1) to get better estimates.
+Use a larger number of trials (say 1000) and a smaller delta (say 1) to get better estimates.\cr
+The plot function will return a series of plots equal to the number of mu1 used in the procedure.
+Type of link used in the beta regression. You can choose one or more of the following: "logit", "probit", "cloglog", "cauchit", "log", "loglog", "all". 
+Y-axis denotes minimum sample size and X-axis denotes minimum power.\cr
 }
 \examples{
-samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.8, power.start =  0.9, trials = 50,
-link.type = c("logit","wilcoxon"))
+samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.75, 
+power.start =  0.8, power.end = 0.9, power.by = 0.1, 
+trials = 50, link.type = c("log","wilcoxon"))
 }

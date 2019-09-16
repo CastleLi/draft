@@ -58,19 +58,10 @@ betapwr <- function(mu0,sd0,mu1,sampsize,trials,seed,link.type,equal.precision,s
     else{
       outtest <- sapply(1:trials, function(i){
         sub.sim <-  subset(sim, trials == i)
-        mf <- match.call(expand.dots = FALSE)
-        m <- match(c("formula", "data", "subset", "na.action", "weights", "offset"), names(mf), 0L)
-        mf <- mf[c(1L, m)]
-        mf$drop.unused.levels <- TRUE
+        X <- cbind(rep(1,nrow(sub.sim)),sub.sim$tmt)
+        colnames(X) <- c("(Intercept)","tmt")
         
-        mf$formula <- as.formula("y~tmt")
-        mf$data <- sub.sim
-        mf[[1L]] <- as.name("model.frame")
-        mf <- eval(mf, parent.frame())
-        X <- model.matrix(terms(as.formula("y~tmt"), data = sub.sim, rhs = 1L), mf)
-        Y <- model.response(mf,"numeric")
-        
-        fit1 <- suppressWarnings(do.call(betareg::betareg.fit,list(x=X, y=Y, link = link.type,type ="ML")))
+        fit1 <- suppressWarnings(do.call(betareg::betareg.fit,list(x=X, y=as.numeric(sub.sim$y), link = link.type,type ="ML")))
         cf <- as.vector(do.call("c",fit1$coefficients))
         se <- sqrt(diag(fit1$vcov))
         wald.pvalue <- 2*pnorm(-abs(cf/se))[2]
@@ -175,8 +166,8 @@ print.samplesize <- function(obj){
     print.minss <- cbind(print.minss,betareg.minss)
   }
   if("wilcoxon" %in% obj$method){
-    wil.minss <- sapply(1:nrow(obj$Power.matrix), function(i) return(paste0(paste(obj$Power.matrix[i,grep("wilcoxon",colnames(obj$Power.matrix))],sep = "",collapse = "("),")")))
-    print.minss <- cbind(print.minss,wil.minss)
+    Wilcoxon <- sapply(1:nrow(obj$Power.matrix), function(i) return(paste0(paste(obj$Power.matrix[i,grep("wilcoxon",colnames(obj$Power.matrix))],sep = "",collapse = "("),")")))
+    print.minss <- cbind(print.minss,Wilcoxon)
   }
   if(nrow(print.minss)==1){
     print.minss<- cbind(print.minss,matrix(obj$Power.matrix[,c("target power","mu1")],nrow = 1))
@@ -188,7 +179,33 @@ print.samplesize <- function(obj){
   print.noquote(print.minss)
 }
 
-plot.unit4 <- function(input.data, text_size, panel_spacing){
+
+plot.samplesize <- function(x,...,link.type){
+  SS.matrix <- data.frame(x$Power.matrix,check.names = FALSE)
+  if(link.type[1]=="all"){
+    link.type <- c("logit", "probit", "cloglog", "log", "loglog")
+  }
+  name.plot <-  c(paste("minimum sample size:",link.type))
+  output.name.plot <- c(paste0("beta regression(",link.type,")"))
+  output.name.plot[grep("wilcoxon",link.type)]
+  #combine minimum sample size
+  input.data <- reshape(SS.matrix,varying = name.plot, 
+                        v.names = "SS",
+                        timevar = "subj", 
+                        times = output.name.plot, 
+                        direction = "long",
+                        new.row.names = c(1:(length(name.plot)*nrow(SS.matrix))))
+  #combine minimum power
+  Power.loc.row <- c(1:nrow(input.data))
+  Power.loc.col <- rep(c(1:length(link.type)),rep(nrow(SS.matrix),length(link.type)))
+  minimum.power <- rep(NA,nrow(input.data))
+  for(i in 1:length(minimum.power)){
+    minimum.power[i] <- input.data[Power.loc.row[i],Power.loc.col[i]]
+  }
+  input.data <- cbind(input.data,minimum.power)
+  
+  text_size <- 12
+  panel_spacing <- 1
   Labels <- as.factor(input.data$subj)
   input.data$mu1 <- as.factor(input.data$mu1)
   levels(input.data$mu1) <- paste0("mu1 = ",levels(input.data$mu1))
@@ -230,32 +247,6 @@ plot.unit4 <- function(input.data, text_size, panel_spacing){
     ) 
 }
 
-plot.samplesize <- function(x,...,link.type){
-  SS.matrix <- data.frame(x$Power.matrix,check.names = FALSE)
-  if(link.type[1]=="all"){
-    link.type <- c("logit", "probit", "cloglog", "log", "loglog")
-  }
-  name.plot <-  c(paste("minimum sample size:",link.type))
-  output.name.plot <- c(paste0("beta regression(",link.type,")"))
-  output.name.plot[grep("wilcoxon",link.type)]
-  #combine minimum sample size
-  input.data <- reshape(SS.matrix,varying = name.plot, 
-                        v.names = "SS",
-                        timevar = "subj", 
-                        times = output.name.plot, 
-                        direction = "long",
-                        new.row.names = c(1:(length(name.plot)*nrow(SS.matrix))))
-  #combine minimum power
-  Power.loc.row <- c(1:nrow(input.data))
-  Power.loc.col <- rep(c(1:length(link.type)),rep(nrow(SS.matrix),length(link.type)))
-  minimum.power <- rep(NA,nrow(input.data))
-  for(i in 1:length(minimum.power)){
-    minimum.power[i] <- input.data[Power.loc.row[i],Power.loc.col[i]]
-  }
-  input.data <- cbind(input.data,minimum.power)
-  plot.unit4(input.data = input.data, text_size = 12, panel_spacing = 1)
-}
-
 
 #' @title Find minimum sample size with Beta distribution
 #' @description  Find minimum sample sizes with Beta distribution and given mu0,sd0,mu1 and target powers.
@@ -263,7 +254,10 @@ plot.samplesize <- function(x,...,link.type){
 #' the target power, delta, and the alternative means.
 #' You can fix the alternative and vary power to match a desired sample size; 
 #' Use default values for the number of trials for a quick view;
-#' Use a larger number of trials (say 1000) and a smaller delta (say 1) to get better estimates.
+#' Use a larger number of trials (say 1000) and a smaller delta (say 1) to get better estimates.\cr
+#' The plot function will return a series of plots equal to the number of mu1 used in the procedure.
+#' Type of link used in the beta regression. You can choose one or more of the following: "logit", "probit", "cloglog", "cauchit", "log", "loglog", "all". 
+#' Y-axis denotes minimum sample size and X-axis denotes minimum power.\cr
 #' @usage samplesize(mu0, sd0, mu1.start, mu1.end = NULL, mu1.by = NULL, 
 #' power.start, power.end = NULL, power.by = NULL, sig.level = 0.05, 
 #' trials = 100, delta = 1, seed = 1, link.type = "logit", 
@@ -290,9 +284,10 @@ plot.samplesize <- function(x,...,link.type){
 #' \item{target power:}{target power.}
 #' \item{mu1:}{mean for the treatment group under the alternative.}
 #' @examples 
-#' samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.8, power.start =  0.9, trials = 50,
-#' link.type = c("logit","wilcoxon"))
-#' @importFrom stats rbeta wilcox.test as.formula model.matrix model.response pnorm terms
+#' samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.75, 
+#' power.start =  0.8, power.end = 0.9, power.by = 0.1, 
+#' trials = 50, link.type = c("log","wilcoxon"))
+#' @importFrom stats rbeta wilcox.test pnorm reshape
 #' @export
 
 samplesize <- function(mu0, sd0, mu1.start, mu1.end = NULL, mu1.by = NULL,

@@ -56,7 +56,21 @@ You can fix the alternative and vary sample size to match a desired power;
 You can fix the sample size and vary the alternative to see which will match a desired power;
 You can vary both;
 Start with a small number of trials (say 100) to determine the rough range of sample sizes or alternatives;
-Use a larger number of trials (say 1000) to get better estimates.
+Use a larger number of trials (say 1000) to get better estimates.\cr
+The plot function will return different plots depends on "by" statement. 
+Type of link used in the beta regression. You can choose one or more of the following: "logit", "probit", "cloglog", "cauchit", "log", "loglog", "all"\cr
+by = "linktype": return graphs that plot power against mu1,
+where mu1 is the mean for the treatment group under the alternative.
+The number of plots will vary depending on the number of link types selected with the last plot showing power based on Wilcoxon Rank Sum Test.
+The first one or several plots show comparisons of power with different sample size, using GLM method with one or several link types.
+The last plot shows a comparison of the power with different sample size using Wilcoxon Rank Sum Test.
+Y-axis denotes power and X-axis denotes mu1, the mean for the treatment group under the alternative.\cr
+by = "samplesize": return a number of plots equal to the number of sample sizes tested.
+Each plot compares power calculated with different link types and the Wilcoxon Rank Sum Test.
+Y-axis denotes power and X-axis denotes mu1, the mean for the treatment group under the alternative.\cr
+by = "mu1": return a number of plots equal to the number of mu1 used in the procedure.
+Each plot compares power calculated with different link types and the Wilcoxon Rank Sum Test.
+Y-axis denotes power and X-axis denotes sample size.\cr
 }
 \examples{
 betapower(mu0 = 0.56, sd0 = 0.255, mu1.start = .70, mu1.end = .75, mu1.by = .05, 
