@@ -64,7 +64,7 @@ Y-axis denotes minimum sample size and X-axis denotes minimum power.\cr
 \examples{
 SSmat <- samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.75, 
 power.start =  0.8, power.end = 0.9, power.by = 0.1, 
-trials = 50, link.type = c("log","wilcoxon"))
+trials = 40, link.type = c("log","wilcoxon"))
 ## show the results
 SSmat
 ## add plot
