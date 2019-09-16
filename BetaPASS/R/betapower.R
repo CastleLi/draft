@@ -230,8 +230,12 @@ plot.betapower <- function(x,...,link.type,by){
 #' \item{sample size}{sample size.} 
 #' \item{mu1}{mean for the treatment group under the alternative.}
 #' @examples 
-#' betapower(mu0 = 0.56, sd0 = 0.255, mu1.start = .70, mu1.end = .75, mu1.by = .05, 
+#' BPmat <- betapower(mu0 = 0.56, sd0 = 0.255, mu1.start = .70, mu1.end = .75, mu1.by = .05, 
 #' ss.start = 30, ss.end = 50, ss.by = 20, trials = 100)
+#' ## show the results
+#' BPmat
+#' ## add plot
+#' plot(BPmat, link.type = "logit", by = "mu1")
 #' @importFrom stats rbeta wilcox.test pnorm reshape
 #' @export
 

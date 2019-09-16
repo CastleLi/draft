@@ -143,43 +143,43 @@ sample.size.mid <- function(mu0,sd0,mu1,power.min,sig.level,trials,delta,seed,li
   return(output)
 }
 
-
-print.samplesize <- function(obj){
+#' @export
+print.samplesize <- function(x,...){
   cat("      Two beta-distributed samples sample size calculation\n")
-  cat("\n              mu0 = ",obj$mu0,"\n              sd0 = ",obj$sd0,"\n")
-  if(obj$equal.precision==FALSE){
-    cat("              sd1 = ",obj$sd1,"\n")
+  cat("\n              mu0 = ",x$mu0,"\n              sd0 = ",x$sd0,"\n")
+  if(x$equal.precision==FALSE){
+    cat("              sd1 = ",x$sd1,"\n")
   }
-  cat("        sig.level = ",obj$sig.level,"\n number of trials = ",obj$trials, "\n \n")
+  cat("        sig.level = ",x$sig.level,"\n number of trials = ",x$trials, "\n \n")
   cat("      Minimum sample size(corresponding power)\n")
-  betareg.links <- setdiff(obj$method,"wilcoxon")
+  betareg.links <- setdiff(x$method,"wilcoxon")
   
   print.minss <- NULL
   if(length(betareg.links)>0){
-    betareg.minss <- mapply(function(i,j) return(paste0(obj$Power.matrix[i,paste("minimum sample size:",j)],"(",
-                                                        obj$Power.matrix[i,paste("minimum power:",j)],")")),
-                            rep(1:nrow(obj$Power.matrix),length(betareg.links)), 
-                            rep(betareg.links,rep(nrow(obj$Power.matrix),length(betareg.links))))
-    betareg.minss <- matrix(betareg.minss,nrow = nrow(obj$Power.matrix))
+    betareg.minss <- mapply(function(i,j) return(paste0(x$Power.matrix[i,paste("minimum sample size:",j)],"(",
+                                                        x$Power.matrix[i,paste("minimum power:",j)],")")),
+                            rep(1:nrow(x$Power.matrix),length(betareg.links)), 
+                            rep(betareg.links,rep(nrow(x$Power.matrix),length(betareg.links))))
+    betareg.minss <- matrix(betareg.minss,nrow = nrow(x$Power.matrix))
     betareg.links <- paste0("beta regression(",betareg.links,")")
     colnames(betareg.minss) <- betareg.links
     print.minss <- cbind(print.minss,betareg.minss)
   }
-  if("wilcoxon" %in% obj$method){
-    Wilcoxon <- sapply(1:nrow(obj$Power.matrix), function(i) return(paste0(paste(obj$Power.matrix[i,grep("wilcoxon",colnames(obj$Power.matrix))],sep = "",collapse = "("),")")))
+  if("wilcoxon" %in% x$method){
+    Wilcoxon <- sapply(1:nrow(x$Power.matrix), function(i) return(paste0(paste(x$Power.matrix[i,grep("wilcoxon",colnames(x$Power.matrix))],sep = "",collapse = "("),")")))
     print.minss <- cbind(print.minss,Wilcoxon)
   }
   if(nrow(print.minss)==1){
-    print.minss<- cbind(print.minss,matrix(obj$Power.matrix[,c("target power","mu1")],nrow = 1))
+    print.minss<- cbind(print.minss,matrix(x$Power.matrix[,c("target power","mu1")],nrow = 1))
     colnames(print.minss)[(ncol(print.minss)-1):ncol(print.minss)] <- c("target power","mu1")
   }
   else{
-    print.minss <- cbind(print.minss,obj$Power.matrix[,c("target power","mu1")])
+    print.minss <- cbind(print.minss,x$Power.matrix[,c("target power","mu1")])
   }
-  print.noquote(print.minss)
+  print.noquote(print.minss,...)
 }
 
-
+#' @export
 plot.samplesize <- function(x,...,link.type){
   SS.matrix <- data.frame(x$Power.matrix,check.names = FALSE)
   if(link.type[1]=="all"){
@@ -284,9 +284,13 @@ plot.samplesize <- function(x,...,link.type){
 #' \item{target power:}{target power.}
 #' \item{mu1:}{mean for the treatment group under the alternative.}
 #' @examples 
-#' samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.75, 
+#' SSmat <- samplesize(mu0=0.56, sd0=0.255, mu1.start = 0.75, 
 #' power.start =  0.8, power.end = 0.9, power.by = 0.1, 
 #' trials = 50, link.type = c("log","wilcoxon"))
+#' ## show the results
+#' SSmat
+#' ## add plot
+#' plot(SSmat, link.type = c("log","wilcoxon"))
 #' @importFrom stats rbeta wilcox.test pnorm reshape
 #' @export
 

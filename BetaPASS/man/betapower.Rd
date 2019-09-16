@@ -73,6 +73,10 @@ Each plot compares power calculated with different link types and the Wilcoxon R
 Y-axis denotes power and X-axis denotes sample size.\cr
 }
 \examples{
-betapower(mu0 = 0.56, sd0 = 0.255, mu1.start = .70, mu1.end = .75, mu1.by = .05, 
+BPmat <- betapower(mu0 = 0.56, sd0 = 0.255, mu1.start = .70, mu1.end = .75, mu1.by = .05, 
 ss.start = 30, ss.end = 50, ss.by = 20, trials = 100)
+## show the results
+BPmat
+## add plot
+plot(BPmat, link.type = "logit", by = "mu1")
 }
